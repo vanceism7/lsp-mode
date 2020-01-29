@@ -23,6 +23,7 @@
 ;; purescript analysis server client
 
 ;;; Code:
+(require 'lsp-mode)
 
 (defgroup lsp-purescript nil
   "LSP support for Purescript, using purescript analysis server."
@@ -53,7 +54,7 @@
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autoStartPscIde t
-  "Whether to automatically start/connect to purs IDE server when editing a PureScript file (includes connecting to an existing running instance). If this is disabled, various features like autocomplete, tooltips, and other type info will not work until start command is run manually.",
+  "Whether to automatically start/connect to purs IDE server when editing a PureScript file (includes connecting to an existing running instance). If this is disabled, various features like autocomplete, tooltips, and other type info will not work until start command is run manually."
   :type 'boolean
   :group 'lsp-purescript)
 
@@ -64,17 +65,17 @@
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-addPscPackageSources nil
-  "Whether to add psc-package sources to the globs passed to the IDE server for source locations (specifically the output of `psc-package sources`, if this is a psc-package project). Update due to adding packages/changing package set requires psc-ide server restart.",
+  "Whether to add psc-package sources to the globs passed to the IDE server for source locations (specifically the output of `psc-package sources`, if this is a psc-package project). Update due to adding packages/changing package set requires psc-ide server restart."
   :type 'boolean
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-addSpagoSources nil
-  "Whether to add spago sources to the globs passed to the IDE server for source locations (specifically the output of `spago sources`, if this is a spago project). Update due to adding packages/changing package set requires psc-ide server restart.",
+  "Whether to add spago sources to the globs passed to the IDE server for source locations (specifically the output of `spago sources`, if this is a spago project). Update due to adding packages/changing package set requires psc-ide server restart."
   :type 'boolean
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-sourcePath "src"
-  "Path to application source root. Will be used to control globs passed to IDE server for source locations. Change requires IDE server restart.",
+  "Path to application source root. Will be used to control globs passed to IDE server for source locations. Change requires IDE server restart."
  :type 'string
  :group 'lsp-purescript)
 
@@ -84,7 +85,7 @@
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-fastRebuild t
-  "Enable purs IDE server fast rebuild",
+  "Enable purs IDE server fast rebuild"
   :type 'boolean
   :group 'lsp-purescript)
 
@@ -99,52 +100,52 @@
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autocompleteAddImport t
-  "Whether to automatically add imported identifiers when accepting autocomplete result.",
+  "Whether to automatically add imported identifiers when accepting autocomplete result."
   :type 'boolean
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autocompleteLimit nil
-  "Maximum number of results to fetch for an autocompletion request. May improve performance on large projects.",
+  "Maximum number of results to fetch for an autocompletion request. May improve performance on large projects."
   :type 'integer
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autocompleteGrouped t
-  "Whether to group completions in autocomplete results. Requires compiler 0.11.6",
+  "Whether to group completions in autocomplete results. Requires compiler 0.11.6"
   :type 'boolean
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-importsPreferredModules "Prelude"
-  "Module to prefer to insert when adding imports which have been re-exported. In order of preference, most preferred first.",
+  "Module to prefer to insert when adding imports which have been re-exported. In order of preference, most preferred first."
   :type '(repeat string)
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-preludeModule "Prelude"
-  "Module to consider as your default prelude, if an auto-complete suggestion comes from this module it will be imported unqualified.",
+  "Module to consider as your default prelude, if an auto-complete suggestion comes from this module it will be imported unqualified."
   :type 'string
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-addNpmPath nil
-  "Whether to add the local npm bin directory to the PATH for purs IDE server and build command.",
+  "Whether to add the local npm bin directory to the PATH for purs IDE server and build command."
   :type 'boolean
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-pscIdelogLevel ""
-  "Log level for purs IDE server",
+  "Log level for purs IDE server"
   :type 'string
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-editorMode nil
-  "Whether to set the editor-mode flag on the IDE server",
+  "Whether to set the editor-mode flag on the IDE server"
   :type 'boolean
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-polling nil
-  "Whether to set the polling flag on the IDE server",
+  "Whether to set the polling flag on the IDE server"
   :type 'boolean
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-outputDirectory nil
-  "Override purs ide output directory (output/ if not specified). This should match up to your build command",
+  "Override purs ide output directory (output/ if not specified). This should match up to your build command"
   :type 'string
   :group 'lsp-purescript)
 
