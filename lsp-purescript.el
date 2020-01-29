@@ -46,10 +46,11 @@
   :type 'string
   :group 'lsp-purescript)
 
-;; (defcustom lsp-purescript-pscIdePort nil
-;;   "Port to use for purs IDE server (whether an existing server or to start a new one). By default a random port is chosen (or an existing port in .psc-ide-port if present), if this is specified no attempt will be made to select an alternative port on failure."
-;;   :type [ "integer", "null" ]
-;;   :group 'lsp-purescript)
+(defcustom lsp-purescript-pscIdePort nil
+  "Port to use for purs IDE server (whether an existing server or to start a new one). By default a random port is chosen (or an existing port in .psc-ide-port if present), if this is specified no attempt will be made to select an alternative port on failure."
+  :type '(choice (const :tag "Default" nil)
+                 (integer))
+  :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autoStartPscIde t
   "Whether to automatically start/connect to purs IDE server when editing a PureScript file (includes connecting to an existing running instance). If this is disabled, various features like autocomplete, tooltips, and other type info will not work until start command is run manually.",
@@ -87,16 +88,10 @@
   :type 'boolean
   :group 'lsp-purescript)
 
-;; "title": "Censor warnings",
-;; (defcustom lsp-purescript-censorWarnings () ;; default []
-;; "title": "Censor warnings",
-;; "description": "The warning codes to censor, both for fast rebuild and a full build. Unrelated to any psa setup. e.g.: [\"ShadowedName\",\"MissingTypeDeclaration\"]",
-;; "type": "array",
-;; "default": [],
-;; "items": {
-;; "type": "string"
-;; },
-;; "scope": "resource"
+(defcustom lsp-purescript-censorWarnings nil
+  "The warning codes to censor, both for fast rebuild and a full build. Unrelated to any psa setup. e.g.: [\"ShadowedName\",\"MissingTypeDeclaration\"]"
+  :type '(repeat string)
+  :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autocompleteAllModules t
   "Whether to always autocomplete from all built modules, or just those imported in the file. Suggestions from all modules always available by explicitly triggering autocomplete."
@@ -108,37 +103,25 @@
   :type 'boolean
   :group 'lsp-purescript)
 
-;; (defcustom lsp-purescript-autocompleteLimit nil
-;;   "Maximum number of results to fetch for an autocompletion request. May improve performance on large projects.",
-;;   :type [
-;;           "null",
-;;           "integer"
-;;           ],
-;;   :group 'lsp-purescript)
+(defcustom lsp-purescript-autocompleteLimit nil
+  "Maximum number of results to fetch for an autocompletion request. May improve performance on large projects.",
+  :type 'integer
+  :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autocompleteGrouped t
   "Whether to group completions in autocomplete results. Requires compiler 0.11.6",
   :type 'boolean
   :group 'lsp-purescript)
 
-;; (defcustom lsp-purescript-importsPreferredModules
-;;  :type 'array
-;;  "items": {
-;;  "type": "string"
-;;  :group 'lsp-purescript)
-;;  "default": [
-;;              "Prelude"
-;;              ],
-;;  "description": "Module to prefer to insert when adding imports which have been re-exported. In order of preference, most preferred first.",
-;;  "scope": "resource"
-;;  :group 'lsp-purescript)
+(defcustom lsp-purescript-importsPreferredModules "Prelude"
+  "Module to prefer to insert when adding imports which have been re-exported. In order of preference, most preferred first.",
+  :type '(repeat string)
+  :group 'lsp-purescript)
 
- (defcustom lsp-purescript-preludeModule"
- :type 'string"
- "default": "Prelude",
- "description": "Module to consider as your default prelude, if an auto-complete suggestion comes from this module it will be imported unqualified.",
- "scope": "resource"
- :group 'lsp-purescript)
+(defcustom lsp-purescript-preludeModule "Prelude"
+  "Module to consider as your default prelude, if an auto-complete suggestion comes from this module it will be imported unqualified.",
+  :type 'string
+  :group 'lsp-purescript)
 
 (defcustom lsp-purescript-addNpmPath nil
   "Whether to add the local npm bin directory to the PATH for purs IDE server and build command.",
@@ -165,26 +148,21 @@
   :type 'string
   :group 'lsp-purescript)
 
- ;; (defcustom lsp-purescript-trace.server"
- ;; "scope": "window",
- ;; :type 'string"
- ;; "enum": [
- ;;          "off",
- ;;          "messages",
- ;;          "verbose"
- ;;          ],
- ;; "default": "off",
- ;; "description": "Traces the communication between VSCode and the PureScript language service."
- ;; :group 'lsp-purescript)
+(defcustom lsp-purescript-trace.server 'off
+  "Traces the communication between VSCode and the PureScript language service."
+  :type '(choice (const "off")
+                 (const "messages")
+                 (const "verbose"))
+  :group 'lsp-purescript)
 
-;; (defcustom lsp-purescript-codegenTargets nil
-;;   "List of codegen targets to pass to the compiler for rebuild. e.g. js, corefn. If not specified (rather than empty array) this will not be passed and the compiler will default to js. Requires 0.12.1+"
-;;   :type 'array
-;;   "default": null,
-;;   "items": {
-;;   "type": "string"
-;;   :group 'lsp-purescript)
+(defcustom lsp-purescript-codegenTargets nil
+  "List of codegen targets to pass to the compiler for rebuild. e.g. js, corefn. If not specified (rather than empty array) this will not be passed and the compiler will default to js. Requires 0.12.1+"
+  :type '(repeat string)
+  :group 'lsp-purescript)
 
+;; ----------
+;; Main stuff
+;; ----------
 (defun lsp-purescript--server-command ()
   "Generate LSP startup command."
   "npx purescript-language-server --stdio")
@@ -204,9 +182,9 @@
                    'lsp-purescript--server-command)
                   :major-modes '(purescript-mode)
                   :priority -1
-                  :initialization-options
-                  `((onlyAnalyzeProjectsWithOpenFiles . ,lsp-purescript-only-analyze-projects-with-open-files)
-                    (suggestFromUnimportedLibraries . ,lsp-purescript-suggest-from-unimported-libraries))
+                  ;; :initialization-options
+                  ;; `((onlyAnalyzeProjectsWithOpenFiles . ,lsp-purescript-only-analyze-projects-with-open-files)
+                  ;;   (suggestFromUnimportedLibraries . ,lsp-purescript-suggest-from-unimported-libraries))
                   :server-id 'purescript_language_server))
 
 (provide 'lsp-purescript)
