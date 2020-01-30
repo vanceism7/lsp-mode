@@ -161,12 +161,21 @@
   :type '(repeat string)
   :group 'lsp-purescript)
 
+(defcustom lsp-purescript-useNpx t
+  "Whether to execute purescript-language-server using npx or a globally installed version. Defaults to Npx"
+  :type '(choice (const :tag "Npx" t)
+                 (const :tag "Global" nil))
+  :group 'lsp-purescript)
+
 ;; ----------
 ;; Main stuff
 ;; ----------
 (defun lsp-purescript--server-command ()
   "Generate LSP startup command."
-  "npx purescript-language-server --stdio")
+  (if lsp-purescript-useNpx
+      ("npx" "purescript-language-server" "--stdio")
+      ("purescript-language-server" "--stdio")))
+  ;; "npx purescript-language-server --stdio")
   ;; (if lsp-purescript-use-npm-bin
   ;;     (expand-file-name "./node_modules/bin/purs ide")
   ;;     (expand-file-name "purs ide")))
@@ -179,8 +188,10 @@
 
 (lsp-register-client
  (make-lsp-client :new-connection
-                  (lsp-stdio-connection
-                   'lsp-purescript--server-command)
+                  (lsp-stdio-connection 'lsp-purescript--server-command)
+                   ;; (lambda () (cons lsp-purescript-server-command
+                   ;;                  '("purescript-language-server"))))
+                   ;; 'lsp-purescript--server-command)
                   :major-modes '(purescript-mode)
                   :priority -1
                   ;; :initialization-options
