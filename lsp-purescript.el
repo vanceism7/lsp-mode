@@ -24,6 +24,7 @@
 
 ;;; Code:
 (require 'lsp-mode)
+(require 'json)
 
 (defgroup lsp-purescript nil
   "LSP support for Purescript, using purescript analysis server."
@@ -84,6 +85,7 @@
   :type 'string
   :group 'lsp-purescript)
 
+
 (defcustom lsp-purescript-fastRebuild t
   "Enable purs IDE server fast rebuild"
   :type 'boolean
@@ -106,7 +108,8 @@
 
 (defcustom lsp-purescript-autocompleteLimit nil
   "Maximum number of results to fetch for an autocompletion request. May improve performance on large projects."
-  :type 'integer
+  :type '(choice (const nil)
+                 integer)
   :group 'lsp-purescript)
 
 (defcustom lsp-purescript-autocompleteGrouped t
@@ -173,25 +176,46 @@
 (defun lsp-purescript--server-command ()
   "Generate LSP startup command."
   (if lsp-purescript-useNpx
-      ("npx" "purescript-language-server" "--stdio")
-      ("purescript-language-server" "--stdio")))
-  ;; "npx purescript-language-server --stdio")
-  ;; (if lsp-purescript-use-npm-bin
-  ;;     (expand-file-name "./node_modules/bin/purs ide")
-  ;;     (expand-file-name "purs ide")))
-   ;; lsp-purescript-server-command
-   ;; `(,(expand-file-name (f-join lsp-purescript-sdk-dir "bin/purescript"))
-   ;;   ,(expand-file-name (f-join lsp-purescript-sdk-dir "bin/snapshots/analysis_server.purescript.snapshot"))
-   ;;   "--lsp")))
+      (append '("npx" "purescript-language-server" "--stdio" "--config") (generate-json-config))
+    (append '("purescript-language-server" "--stdio" "--config") (generate-json-config))))
 
-;; TODO: Need function to convert all config options into json
+(lsp-purescript--server-command)
+(generate-json-config)
+
+(defun generate-json-config ()
+  "Generate json config for purescript language server executable from custom options"
+  (list
+   (let (obj (json-new-object))
+     (setf obj (json-add-to-object obj "addNpmPath" lsp-purescript-addNpmPath))
+     (setf obj (json-add-to-object obj "pursExe" lsp-purescript-pursExe))
+     (setf obj (json-add-to-object obj "useCombinedExe" lsp-purescript-useCombinedExe))
+     (setf obj (json-add-to-object obj "pscIdeServerExe" lsp-purescript-pscIdeServerExe))
+     (setf obj (json-add-to-object obj "pscIdePort" lsp-purescript-pscIdePort))
+     (setf obj (json-add-to-object obj "autoStartPscIde" lsp-purescript-autoStartPscIde))
+     (setf obj (json-add-to-object obj "packagePath" lsp-purescript-packagePath))
+     (setf obj (json-add-to-object obj "addPscPackageSources" lsp-purescript-addPscPackageSources))
+     (setf obj (json-add-to-object obj "addSpagoSources" lsp-purescript-addSpagoSources))
+     (setf obj (json-add-to-object obj "sourcePath" lsp-purescript-sourcePath))
+     (setf obj (json-add-to-object obj "buildCommand" lsp-purescript-buildCommand))
+     (setf obj (json-add-to-object obj "fastRebuild" lsp-purescript-fastRebuild))
+     (setf obj (json-add-to-object obj "censorWarnings" lsp-purescript-censorWarnings))
+     (setf obj (json-add-to-object obj "autocompleteAllModules" lsp-purescript-autocompleteAllModules))
+     (setf obj (json-add-to-object obj "autocompleteAddImport" lsp-purescript-autocompleteAddImport))
+     (setf obj (json-add-to-object obj "autocompleteLimit" lsp-purescript-autocompleteLimit))
+     (setf obj (json-add-to-object obj "autocompleteGrouped" lsp-purescript-autocompleteGrouped))
+     (setf obj (json-add-to-object obj "importsPreferredModules" lsp-purescript-importsPreferredModules))
+     (setf obj (json-add-to-object obj "preludeModule" lsp-purescript-preludeModule))
+     (setf obj (json-add-to-object obj "addNpmPath" lsp-purescript-addNpmPath))
+     (setf obj (json-add-to-object obj "pscIdelogLevel" lsp-purescript-pscIdelogLevel))
+     (setf obj (json-add-to-object obj "editorMode" lsp-purescript-editorMode))
+     (setf obj (json-add-to-object obj "polling" lsp-purescript-polling))
+     (setf obj (json-add-to-object obj "outputDirectory" lsp-purescript-outputDirectory))
+     (setf obj (json-add-to-object obj "trace.server" lsp-purescript-trace.server))
+     (setf obj (json-add-to-object obj "codegenTargets" lsp-purescript-codegenTargets))
+     (json-encode (json-add-to-object obj "useNpx" lsp-purescript-useNpx)))))
 
 (lsp-register-client
- (make-lsp-client :new-connection
-                  (lsp-stdio-connection 'lsp-purescript--server-command)
-                   ;; (lambda () (cons lsp-purescript-server-command
-                   ;;                  '("purescript-language-server"))))
-                   ;; 'lsp-purescript--server-command)
+ (make-lsp-client :new-connection (lsp-stdio-connection (lsp-purescript--server-command))
                   :major-modes '(purescript-mode)
                   :priority -1
                   ;; :initialization-options
