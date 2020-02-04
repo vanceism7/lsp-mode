@@ -211,12 +211,16 @@
                  (const :tag "Global" nil))
   :group 'lsp-purescript)
 
-
 (defun lsp-purescript--server-command ()
   "Generate LSP startup command."
   (if lsp-purescript-use-npx
       '("npx" "purescript-language-server" "--stdio")
     '("purescript-language-server" "--stdio")))
+
+;; Add language id for lsp-purescript
+(add-to-list
+ 'lsp-language-id-configuration
+ '(purescript-mode . "purescript"))
 
 (lsp-register-client
  (make-lsp-client :new-connection (lsp-stdio-connection (lsp-purescript--server-command))
@@ -226,7 +230,7 @@
                                     (with-lsp-workspace workspace
                                       (lsp--set-configuration
                                        (lsp-configuration-section "purescript"))))))
-                  ;; :server-id 'purescript_language_server
+                  :server-id 'purescript_language_server
                   ;; :download-server-fn (lambda (_client callback error-callback _update?)
                   ;;                       (lsp-package-ensure
                   ;;                        'purescript-language-server
